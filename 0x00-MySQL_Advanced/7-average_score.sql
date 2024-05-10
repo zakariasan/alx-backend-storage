@@ -1,6 +1,7 @@
 -- Write a SQL script that creates a trigger that decreases the quantity
-DELIMITER //
+DELIMITER $$
 
+DROP PROCEDURE IF EXISTS ComputeAverageScoreForUser
 CREATE PROCEDURE ComputeAverageScoreForUser(IN user_id INT)
 BEGIN
     DECLARE total_score FLOAT;
@@ -19,7 +20,7 @@ BEGIN
         SET average_score = total_score / num_corrections
         WHERE id = user_id;
     END IF;
-END //
+END $$
 
 DELIMITER ;
 
