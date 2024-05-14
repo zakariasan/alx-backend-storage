@@ -1,0 +1,2 @@
+// print the curent dbs
+db.school.deleteMany({name:"Holberton school"})
