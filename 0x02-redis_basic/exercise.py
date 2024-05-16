@@ -7,16 +7,19 @@ from typing import Union, Any, Callable, Optional
 from functools import wraps
 
 
-def replay(method: Callable):
+def replay(method: Callable) -> None:
     """Display the history of calls for a particular function."""
 
-    def count_calls_wrapper(self, *args, **kwargs):
-        key = method.__qualname__
-        inputs = self._redis.lrange(f"{key}:inputs", 0, -1)
-        outputs = self._redis.lrange(f"{key}:outputs", 0, -1)
-        print(f"{key} was called {len(inputs)} times:")
-        for inp, out in zip(inputs, outputs):
-            print(f"{key}(*{inp.decode()}) -> {out.decode()}")
+    client = redis.Redis()
+    key = method.__qualname__
+    calls = client.get(method.__qualname__).decode('utf-8')
+    inputs = [input.decode('utf-8') for input in
+              client.lrange(f'{method.__qualname__}:inputs', 0, -1)]
+    outputs = [output.decode('utf-8') for output in
+               client.lrange(f'{method.__qualname__}:outputs', 0, -1)]
+    print(f"{key} was called {calls} times:")
+    for inp, out in zip(inputs, outputs):
+        print(f"{key}(*{inp.decode()}) -> {out.decode()}")
 
 
 def call_history(method: Callable) -> Callable:
