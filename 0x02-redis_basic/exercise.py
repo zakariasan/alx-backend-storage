@@ -8,8 +8,8 @@ from functools import wraps
 
 
 def replay(method: Callable) -> None:
-    """Display the history of calls for a particular function."""
-
+    """Display the history of calls for a particular function.
+    """
     client = redis.Redis()
     key = method.__qualname__
     calls = client.get(method.__qualname__).decode('utf-8')
@@ -19,7 +19,7 @@ def replay(method: Callable) -> None:
                client.lrange(f'{method.__qualname__}:outputs', 0, -1)]
     print(f"{key} was called {calls} times:")
     for inp, out in zip(inputs, outputs):
-        print(f"{key}(*{inp.decode()}) -> {out.decode()}")
+        print(f"{key}(*{inp}) -> {out}")
 
 
 def call_history(method: Callable) -> Callable:
