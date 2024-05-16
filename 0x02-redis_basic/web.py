@@ -4,21 +4,23 @@
 import requests
 from functools import wraps
 import redis
+from typing import Callable
 
 
-def cache_page(func):
+def cache_page(func: Callable) -> Callable:
     """ cache page """
     @wraps(func)
     def wrapper(url: str) -> str:
         """ wrapper the wrapper """
         cache = redis.Redis()
-        key = f"count:{url}"
+        cache.incr(f'count:{url}')
+        key = f"{url}"
         content = cache.get(key)
         if content:
-            return content.decode()
+            return content.decode('utf-8')
 
         response = func(url)
-        cache.setex(key, 10, response)
+        cache.set(f'{url}', response, 10)
         return response
     return wrapper
 
