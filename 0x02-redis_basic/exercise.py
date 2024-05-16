@@ -26,6 +26,7 @@ def call_history(method: Callable) -> Callable:
     """Decorator to store the history of inputs and outputs for a function."""
     @wraps(method)
     def wrap(self, *args, **kwargs):
+        """ wrap the wrapper """
         key = method.__qualname__
         self._redis.rpush(f"{key}:inputs", str(args))
         output = method(self, *args, **kwargs)
@@ -38,6 +39,7 @@ def count_calls(method: Callable) -> Callable:
     """Decorator to count the number of times a method is called."""
     @wraps(method)
     def wrap(self, *args, **kwargs):
+        """ wrap the wrapper """
         key = method.__qualname__
         self._redis.incr(key)
         return method(self, *args, **kwargs)
@@ -48,12 +50,14 @@ class Cache:
     """ class caching"""
 
     def __init__(self):
+        """ __init__ cache """
         self._redis = redis.Redis()
         self._redis.flushdb()
 
     @call_history
     @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
+        """ store data """
         key = str(uuid.uuid4())
         self._redis.set(key, data)
         return key
@@ -61,6 +65,7 @@ class Cache:
     def get(
             self,
             key: str, fn: Optional[Callable] = None) -> Any:
+        """ get data redis """
         data = self._redis.get(key)
         if data is None:
             return None
@@ -69,7 +74,9 @@ class Cache:
         return data
 
     def get_str(self, key: str) -> str:
+        """ get str out """
         return self.get(key, fn=lambda d: d.decode("utf-8"))
 
     def get_int(self, key: str) -> int:
+        """ get int out """
         return self.get(key, fn=int)
